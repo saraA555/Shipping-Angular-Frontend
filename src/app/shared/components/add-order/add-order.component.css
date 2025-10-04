@@ -1,0 +1,71 @@
+
+body {
+  direction: rtl;
+  text-align: right;
+}
+
+.form-label, .form-control, .form-select {
+  text-align: right;
+}
+
+.table {
+  direction: rtl;
+}
+
+.table th, .table td {
+  text-align: right;
+}
+
+.fa {
+  margin-left: 5px;
+  margin-right: 0;
+}
+
+.form-select {
+  background-position: left 0.75rem center;
+}
+
+.input-group-text {
+  direction: ltr; 
+}
+
+.table-responsive {
+  direction: rtl;
+}
+
+.table thead th {
+  border-right: none;
+  border-left: 1px solid #dee2e6;
+}
+
+  .btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(185, 34, 34, 0.1);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    border: none;
+  }
+
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+  }
+  
+  .btn-confirm {
+      background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%);
+      color: #1a2530 !important;
+      font-weight: 700;
+      border: none;
+    }
+    
+    .btn-confirm:hover {
+      background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(180, 134, 11, 0.3) !important;
+    }
+
+.btn i {
+  margin-right: 0;
+  margin-left: 5px;
+}

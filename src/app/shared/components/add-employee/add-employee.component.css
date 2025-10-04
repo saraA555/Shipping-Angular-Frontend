@@ -1,0 +1,165 @@
+
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #FFD700;
+  --gold-dark: #B8860B;
+  --delete: #C41E3A;
+  --edit: #4169E1;
+  --confirm: #50C878;
+  --dark-bg: #2c3e50;
+  --darker-bg: #1a2530;
+  --input-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+  --text-light: #ecf0f1;
+  --text-dark: #2c3e50;
+  --icon-spacing: 12px;
+}
+
+body {
+  background-color: #f8fafc;
+  color: var(--text-dark);
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid var(--gold-primary);
+}
+
+.card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-7px);
+}
+
+.input-gold {
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-align: right;
+  box-shadow: var(--input-shadow);
+}
+
+.input-gold:focus {
+  border: 2px solid var(--gold-primary);
+  outline: none;
+}
+
+.btn-gold {
+  background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold-primary) 100%);
+  color: #1a2530 !important;
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  font-weight: 700;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(90deg, var(--gold-primary) 0%, var(--gold-light) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(180, 134, 11, 0.3);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.text-danger {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--delete);
+}
+
+
+i.fas {
+  margin-right: var(--icon-spacing);
+}
+
+
+select.form-select.text-center {
+  text-align: center;
+}
+
+select.form-select.text-center option {
+  text-align: center;
+}
+
+
+.text-danger i.fas {
+  margin-left: 8px;
+}
+
+
+button[type="submit"] {
+  background: linear-gradient(90deg, var(--gold-dark) 10%, var(--gold-primary) 100%) ;
+  color: #1a2530 !important;
+  font-weight: 700;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, var(--gold-primary) 0%, var(--gold-light) 100%) ;
+  color: #1a2530 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(180, 134, 11, 0.3) !important;
+}
+
+button[type="submit"]:disabled {
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%) !important;
+  cursor: not-allowed;
+  color: #666666 !important;
+  transform: none;
+  box-shadow: none;
+}
+.form-label {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .input-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 0.9rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+
+  i.fas {
+    margin-left: 8px;
+  }
+}
+
+.btn {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+
+.close-btn {
+  position: absolute;
+  left: 20px;
+  top: 15px;
+  color: var(--delete);
+  font-size: 1.5rem;
+}

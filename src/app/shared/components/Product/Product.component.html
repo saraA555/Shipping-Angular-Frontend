@@ -1,0 +1,30 @@
+<div class="container mt-4">
+  <h2 class="mb-4">إدارة المنتجات</h2>
+  <div *ngIf="loading" class="text-center my-3">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>اسم المنتج</th>
+        <th>الوزن</th>
+        <th>الكمية</th>
+        <th>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td>{{ product.name }}</td>
+        <td>{{ product.weight }}</td>
+        <td>{{ product.quantity }}</td>
+        <td>
+          <button class="btn btn-sm btn-info me-2" (click)="selectProduct(product)">تعديل</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteProduct(product.id!)">حذف</button>
+        </td>
+      </tr>
+      <tr *ngIf="products.length === 0">
+        <td colspan="4" class="text-center">لا توجد منتجات</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

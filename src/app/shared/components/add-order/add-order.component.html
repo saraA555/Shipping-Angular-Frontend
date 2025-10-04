@@ -1,0 +1,442 @@
+<div class="section" dir="rtl"  style="background: linear-gradient(135deg, #f8f9fa 0%, #f1f2f6 100%); padding: 20px; min-height: 100vh;">
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+      <h2 class="mb-0 text-white fw-bold">
+        <i class="fas fa-plus-circle me-3" style="color: #D4AF37;"></i> إضافة طلب جديد
+      </h2> 
+     
+    </div>
+
+    <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+<div *ngIf="isEmployee" class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+  <div class="card-header" style="background: #2c3e50; color: white;">
+    <h5 class="mb-0">معلومات التاجر</h5>
+  </div>
+  <div class="card-body p-4">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+          <i class="fas fa-user-tie" style="color: #D4AF37; margin: 10px;"></i>
+          اسم التاجر
+        </label>
+        <select
+          class="form-select py-3 input-gold text-center"
+          formControlName="merchantId"
+          (change)="onMerchantSelect($event)"
+          [class.is-invalid]="orderForm.get('merchantId')?.invalid && orderForm.get('merchantId')?.touched"
+        >
+          <option value="">اختر التاجر</option>
+          <option *ngFor="let merchant of merchants" [value]="merchant.id">
+            {{ merchant.fullName }}
+          </option>
+        </select>
+        <div
+          *ngIf="
+            orderForm.get('merchantId')?.invalid &&
+            orderForm.get('merchantId')?.touched
+          "
+          class="text-danger mt-2 fw-medium"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>يرجى اختيار التاجر
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">معلومات الخدمة الأساسية</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-tasks" style="color: #D4AF37; margin: 10px;"></i>
+                نوع الخدمة
+              </label>
+              <select
+                class="form-select py-3 input-gold text-center"
+                formControlName="orderTypes"
+                [class.is-invalid]="orderForm.get('orderTypes')?.invalid"
+              >
+                <option value="" disabled selected>اختر نوع الخدمة</option>
+                <option
+                  *ngFor="let type of orderTypes"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+              <div
+                *ngIf="orderForm.get('orderTypes')?.invalid"
+                class="text-danger mt-2 fw-medium "
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>نوع الخدمة مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-shipping-fast" style="color: #D4AF37; margin: 10px;"></i>
+                نوع الشحن
+              </label>
+              <select
+                class="form-select py-3 input-gold text-center"
+                formControlName="ShippingId"
+                [class.is-invalid]="orderForm.get('ShippingId')?.invalid"
+              >
+                <option value="" disabled selected>اختر نوع الشحن</option>
+                <option 
+                  *ngFor="let type of shippingTypes"
+                  [value]="type.id"
+                >
+                  {{type.name}}
+                </option>
+              </select>
+              <div
+                *ngIf="orderForm.get('ShippingId')?.invalid"
+                class="text-danger mt-2 fw-medium"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>نوع الشحن مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-map-marked-alt" style="color: #D4AF37; margin: 10px;"></i>
+                نطاق التوصيل
+              </label>
+              <select
+                class="form-select py-3 input-gold text-center"
+                formControlName="isOutOfCityShipping"
+                [class.is-invalid]="
+                  orderForm.get('isOutOfCityShipping')?.invalid
+                "
+              >
+                <option [value]="true">خارج المدينة</option>
+                <option [value]="false">داخل المدينة</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">معلومات الموقع</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-map" style="color: #D4AF37; margin: 10px;"></i>
+                المحافظة
+              </label>
+              <ng-select
+                class="py-1 input-gold text-center"
+                [items]="regions"
+                bindLabel="governorate"
+                bindValue="id"
+                [formControl]="regionControl"
+                placeholder="ابحث أو اختر المحافظة"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                [appendTo]="'body'"
+                id="region"
+              ></ng-select>
+              <div *ngIf="orderForm.get('region')?.invalid && orderForm.get('region')?.touched" class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-city" style="color: #D4AF37; margin: 10px;"></i>
+                المدينة
+              </label>
+              <ng-select
+                class="py-1 input-gold text-center"
+                [items]="cities"
+                bindLabel="name"
+                bindValue="id"
+                [formControl]="cityControl"
+                placeholder="ابحث أو اختر المدينة"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                [appendTo]="'body'"
+                id="city"
+              ></ng-select>
+              <div *ngIf="orderForm.get('city')?.invalid && orderForm.get('city')?.touched" class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-code-branch" style="color: #D4AF37; margin: 10px;"></i>
+                الفرع
+              </label>
+              <ng-select
+                class="py-1 input-gold text-center"
+                [items]="branches"
+                bindLabel="name"
+                bindValue="id"
+                [formControl]="branchControl"
+                placeholder="ابحث أو اختر الفرع"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                [appendTo]="'body'"
+                id="branch"
+              ></ng-select>
+              <div *ngIf="orderForm.get('branch')?.invalid && orderForm.get('branch')?.touched" class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+            
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">معلومات العميل</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-4  text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-user" style="color: #D4AF37; margin: 10px;"></i>
+                اسم العميل
+              </label>
+              <input
+                type="text"
+                class="form-control py-3 input-gold text-end"
+                formControlName="customerName"
+                [class.is-invalid]="orderForm.get('customerName')?.invalid"
+              />
+              <div *ngIf="orderForm.get('customerName')?.invalid" class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-2"></i>حقل مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-phone" style="color: #D4AF37; margin: 10px;"></i>
+                الهاتف الأساسي
+              </label>
+              <input
+                type="tel"
+                class="form-control py-3 input-gold text-end"
+                formControlName="customerPhone1"
+                [class.is-invalid]="orderForm.get('customerPhone1')?.invalid"
+              />
+              <div *ngIf="orderForm.get('customerPhone1')?.errors?.['pattern']" class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-2"></i>رقم هاتف غير صالح
+              </div>
+              </div>
+
+               <div class="col-md-4 text-center">
+                  <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                    <i class="fas fa-envelope" style="color: #D4AF37; margin: 10px;"></i>
+                    البريد الإلكتروني
+                  </label>
+                  <input
+                    type="email"
+                    class="form-control py-3 input-gold text-end"
+                    formControlName="customerEmail"
+                  />
+                </div>
+
+            <div class="col-md-12 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-map-marked-alt" style="color: #D4AF37; margin: 10px;"></i>
+                العنوان التفصيلي
+              </label>
+              <input
+                type="text"
+                class="form-control py-3 input-gold text-end"
+                formControlName="customerAddress"
+                [class.is-invalid]="orderForm.get('customerAddress')?.invalid"
+              />
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">إعدادات الدفع</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-12 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-credit-card" style="color: #D4AF37; margin: 10px;"></i>
+                طريقة الدفع
+              </label>
+              <select
+                class="form-select py-3 input-gold text-center"
+                formControlName="paymentType"
+                [class.is-invalid]="orderForm.get('paymentType')?.invalid"
+              >
+                <option value="" disabled selected>اختر طريقة الدفع</option>
+                <option
+                  *ngFor="let type of paymentTypes"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+              <div
+                *ngIf="orderForm.get('paymentType')?.invalid"
+                class="text-danger mt-2 fw-medium"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>طريقة الدفع مطلوبة
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">المنتجات</h5>
+          <button
+            type="button"
+            class="btn"
+            style="background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%); color: #1a2530;"
+            (click)="addProduct()"
+          >
+            <i class="fas fa-plus me-2"></i>إضافة منتج
+          </button>
+        </div>
+        <div class="card-body p-4">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th width="20%" class="text-center">اسم المنتج</th>
+                  <th width="10%" class="text-center">الكمية</th>
+                  <th width="10%" class="text-center">الوزن (كجم)</th>
+                  <th width="15%" class="text-center">سعر الوحدة</th>
+                  <th width="15%" class="text-center">الإجمالي</th>
+                  <th width="10%" class="text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody formArrayName="products">
+                <tr
+                  *ngFor="let product of products.controls; let i = index"
+                  [formGroupName]="i"
+                >
+                  <td>
+                    <input
+                      type="text"
+                      class="form-control input-gold text-center"
+                      formControlName="name"
+                      placeholder="اسم المنتج"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control input-gold text-center"
+                      formControlName="quantity"
+                      placeholder="الكمية"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control input-gold text-center"
+                      formControlName="weight"
+                      placeholder="الوزن (كجم)"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      class="form-control input-gold text-center"
+                      formControlName="unitPrice"
+                      placeholder="سعر الوحدة"
+                    />
+                    <div
+                      *ngIf="product.get('unitPrice')?.invalid && product.get('unitPrice')?.touched"
+                      class="text-danger small text-centermt-2"
+                    >
+                      <i class="fas fa-exclamation-circle me-2"></i>السعر مطلوب ويجب أن يكون أكبر من 0
+                    </div>
+                  </td>
+                  <td class="text-end align-middle">
+                    {{ calculateProductTotal(i) | number:'1.2-2' }}
+                  </td>
+                  <td class="text-center align-middle">
+                    <button
+                      type="button"
+                     class="btn btn-danger btn-sm d-flex justify-content-center align-items-center mx-auto"
+                      (click)="removeProduct(i)"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header" style="background: #2c3e50; color: white;">
+          <h5 class="mb-0">التكاليف الإجمالية</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-weight" style="color: #D4AF37; margin: 10px;"></i>
+                الوزن الإجمالي (كجم)
+              </label>
+              <input
+                type="number"
+                class="form-control py-3 input-gold text-center"
+                formControlName="totalWeight"
+                readonly
+              />
+            </div>
+            <div class="col-md-4 text-center">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-money-bill-wave" style="color: #D4AF37; margin: 10px;"></i>
+                التكلفة الإجمالية
+              </label>
+              <input
+                type="number"
+                class="form-control py-3 input-gold text-center"
+                formControlName="orderCost"
+                readonly
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-lg rounded-pill px-5 py-3 fw-bold shadow-sm" 
+          
+          style="min-width: 250px; background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%); color: #1a2530;"
+          [disabled]="orderForm.invalid"
+          routerLink="/orders">
+          <i class="fas fa-save" style="margin: 10px;"></i>حفظ الطلب
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+.arabic-style {
+  direction: rtl;
+  text-align: right;
+}
+
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #FFD700;
+  --gold-dark: #B8860B;
+  --delete: #C41E3A;
+  --edit: #4169E1;
+  --dark-bg: #2c3e50;
+  --darker-bg: #1a2530;
+  --input-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+}
+
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid var(--gold-primary);
+}
+
+.card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-7px);
+}
+
+.input-gold {
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-align: right;
+  box-shadow: var(--input-shadow);
+}
+
+.input-gold:focus {
+  border: 2px solid var(--gold-primary);
+  outline: none;
+}
+
+.text-danger {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--delete);
+}
+
+.table-hover tbody tr {
+  transition: all 0.3s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.btn {
+  border-radius: 6px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.form-switch .form-check-input {
+  height: 1.5rem;
+  width: 3rem;
+  cursor: pointer;
+  background-color: var(--gold-dark) !important;
+  border: 1px solid #dee2e6 !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%232c3e50'/%3e%3c/svg%3e");
+  transition: all 0.3s ease;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: #B8860B !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+}
+
+.form-check {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.25rem;
+  }
+  
+  .row {
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
+  }
+  
+  .col-md-4, .col-md-6 {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+}

@@ -1,0 +1,406 @@
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
+<div class="container mt-5 arabic-style" style="font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #f1f2f6 100%); min-height: 100vh; padding: 20px;">
+  <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+    <h2 class="mb-0 text-white fw-bold">
+      <i class="fas fa-user-plus me-3" style="color: #D4AF37;"></i> تسجيل تاجر جديد
+    </h2>
+  </div>
+  <!-- Registration Form Card -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+    <div class="card-body p-4">
+      <form (ngSubmit)="createMerchant()" #merchantForm="ngForm">
+        <!-- Personal Information Section -->
+       <div class="mb-4">
+          <h5 class="pb-2 mb-3" style="border-bottom: 2px solid #D4AF37; color: #2c3e50;">المعلومات الشخصية</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-user" style="color: #D4AF37; margin: 10px;"></i>الاسم الكامل
+              </label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                  <i class="fas fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control py-3 input-gold"
+                  id="fullName"
+                  name="fullName"
+                  [(ngModel)]="merchant.fullName"
+                  required
+                  #fullNameInput="ngModel"
+                  placeholder="أدخل الاسم الكامل"
+                />
+              </div>
+              <div
+                *ngIf="fullNameInput.invalid && fullNameInput.touched"
+                class="text-danger mt-1"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-envelope" style="color: #D4AF37; margin: 10px;"></i>البريد الإلكتروني
+              </label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                  <i class="fas fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  class="form-control py-3 input-gold"
+                  id="email"
+                  name="email"
+                  [(ngModel)]="merchant.email"
+                  required
+                  email
+                  #emailInput="ngModel"
+                  placeholder="example@domain.com"
+                />
+              </div>
+              <div
+                *ngIf="emailInput.invalid && emailInput.touched"
+                class="text-danger mt-1"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>يرجى إدخال بريد إلكتروني صحيح
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold text-white mb-3" 
+                    style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-lock" style="color: #D4AF37; margin: 10px;"></i>كلمة المرور
+              </label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text" 
+                      style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  class="form-control py-3 input-gold"
+                  id="password"
+                  name="password"
+                  [(ngModel)]="merchant.password"
+                  required
+                  minlength="6"
+                  pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$"
+                  #passwordInput="ngModel"
+                  placeholder="أدخل كلمة المرور"
+                />
+              </div>
+
+              <div *ngIf="passwordInput.invalid && passwordInput.touched" class="text-danger mt-1">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span *ngIf="passwordInput.errors?.['required']">كلمة المرور مطلوبة</span>
+                <span *ngIf="passwordInput.errors?.['minlength']">كلمة المرور يجب أن تكون 6 أحرف على الأقل</span>
+                <span *ngIf="passwordInput.errors?.['pattern']">
+                  كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، وعلامة خاصة
+                </span>
+              </div>
+            </div>
+
+            
+            <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold text-white mb-3" 
+                  style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              <i class="fas fa-phone" style="color: #D4AF37; margin: 10px;"></i>رقم الهاتف
+            </label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text" 
+                    style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                <i class="fas fa-phone"></i>
+              </span>
+              <input
+                type="tel"
+                class="form-control py-3 input-gold"
+                id="phoneNumber"
+                name="phoneNumber"
+                [(ngModel)]="merchant.phoneNumber"
+                required
+                pattern="^01[0-9]{9}$"
+                #phoneInput="ngModel"
+                placeholder="01xxxxxxxxx"
+              />
+            </div>
+
+            <div *ngIf="phoneInput.invalid && phoneInput.touched" class="text-danger mt-2 fw-medium">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              <span *ngIf="phoneInput.errors?.['required']">رقم الهاتف مطلوب</span>
+              <span *ngIf="phoneInput.errors?.['pattern']">رقم هاتف مصري صحيح مطلوب (11 رقم يبدأ بـ 01)</span>
+            </div>
+          </div>
+
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              <i class="fas fa-map-marker-alt" style="color: #D4AF37; margin: 10px;"></i>العنوان
+            </label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                <i class="fas fa-map-marker-alt"></i>
+              </span>
+              <textarea
+                class="form-control py-3 input-gold"
+                id="address"
+                name="address"
+                [(ngModel)]="merchant.address"
+                required
+                rows="2"
+                #addressInput="ngModel"
+                placeholder="أدخل عنوان تفصيلي"
+              ></textarea>
+            </div>
+            <div
+              *ngIf="addressInput.invalid && addressInput.touched"
+              class="text-danger mt-1"
+            >
+              <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Information Section -->
+        <div class="mb-4">
+          <h5 class="pb-2 mb-3" style="border-bottom: 2px solid #D4AF37; color: #2c3e50;">معلومات المتجر</h5>
+          <div class="mb-3">
+            <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              <i class="fas fa-store" style="color: #D4AF37; margin: 10px;"></i>اسم المتجر
+            </label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                <i class="fas fa-store"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control py-3 input-gold"
+                id="storeName"
+                name="storeName"
+                [(ngModel)]="merchant.storeName"
+                required
+                #storeNameInput="ngModel"
+                placeholder="أدخل اسم المتجر"
+              />
+            </div>
+            <div
+              *ngIf="storeNameInput.invalid && storeNameInput.touched"
+              class="text-danger mt-1"
+            >
+              <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+            </div>
+          </div>
+          
+          <div class="row">
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-map-marker" style="color: #D4AF37; margin: 10px;"></i>المحافظة
+              </label>
+              <ng-select
+                [items]="regions"
+                bindLabel="governorate"
+                bindValue="id"
+                [(ngModel)]="merchant.regionId"
+                placeholder="ابحث أو اختر المحافظة"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                id="regionId"
+                (change)="onRegionChange()"
+                required
+                name="regionId"
+                #regionIdInput="ngModel"
+                class="input-gold text-center"
+              ></ng-select>
+              <div
+                *ngIf="regionIdInput.invalid && regionIdInput.touched"
+                class="text-danger mt-1"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-city" style="color: #D4AF37; margin: 10px;"></i>المدينة
+              </label>
+              <ng-select
+                [items]="cities"
+                bindLabel="name"
+                bindValue="id"
+                [(ngModel)]="merchant.cityId"
+                placeholder="ابحث أو اختر المدينة"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                id="cityId"
+                [disabled]="!merchant.regionId"
+                (change)="onCityChange()"
+                required
+                name="cityId"
+                #cityIdInput="ngModel"
+                class="input-gold text-center"
+              ></ng-select>
+              <div
+                *ngIf="cityIdInput.invalid && cityIdInput.touched"
+                class="text-danger mt-1"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-code-branch" style="color: #D4AF37; margin: 10px;"></i>الفرع
+              </label>
+              <ng-select
+                [items]="branches"
+                bindLabel="name"
+                bindValue="id"
+                [(ngModel)]="merchant.branchId"
+                placeholder="ابحث أو اختر الفرع"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                id="branchId"
+                [disabled]="!merchant.cityId && !merchant.regionId"
+                required
+                name="branchId"
+                #branchIdInput="ngModel"
+                class="input-gold text-center"             
+              ></ng-select>
+              <div
+                *ngIf="branchIdInput.invalid && branchIdInput.touched"
+                class="text-danger mt-1"
+              >
+                <i class="fas fa-exclamation-circle me-2"></i>هذا الحقل مطلوب
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Discounts Button -->
+        <div class="d-flex justify-content-end mb-3">
+          <button 
+            type="button" 
+            class="btn rounded-pill px-4 py-2 fw-bold"
+            (click)="toggleDiscountsSection()"
+            style="background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%); 
+                    border: none; 
+                    color: #1a2530;"
+          >
+            <i class="fas fa-tag me-2"></i>
+             {{ showDiscountsSection ? 'إخفاء خصومات المدن' : 'إضافة خصومات للمدن' }}
+          </button>
+        </div>
+
+        <!-- Special City Costs Section - Hidden by default -->
+        <div *ngIf="showDiscountsSection" class="card mb-4 border-0 shadow-sm">
+          <div class="card-header text-end" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+            <h5 class="mb-0">خصومات المدن</h5>
+            <small>حدد المدن التي تريد تطبيق خصم خاص عليها</small>
+          </div>
+          <div class="card-body">
+            <!-- Search Box -->
+            <div class="input-group mb-3">
+              <input 
+                type="text" 
+                class="form-control py-3 input-gold" 
+                placeholder="ابحث عن مدينة..." 
+                [(ngModel)]="citySearchTerm"
+                (input)="filterCities()"
+                name="citySearch"
+              >
+              <button class="btn btn-outline-secondary" type="button" style="background: #2c3e50; color: #D4AF37; border-color: #1a2530;">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+
+            <div *ngIf="loadingCities" class="text-center">
+              <div class="spinner-border text-primary" role="status" style="color: #D4AF37 !important;">
+                <span class="visually-hidden">جاري التحميل...</span>
+              </div>
+            </div>
+            
+            <div *ngIf="!loadingCities" class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+                    <th width="5%" class="text-center">#</th>
+                    <th width="30%" class="text-end">اسم المدينة</th>
+                    <th width="30%" class="text-end">المحافظة</th>
+                    <th width="20%" class="text-end">سعر الشحن المخصص</th>
+                    <th width="15%" class="text-center">تفعيل</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let city of filteredCities; let i = index">
+                    <td class="text-center">{{ i + 1 }}</td>
+                    <td class="text-end">{{ city.name }}</td>
+                    <td class="text-end">{{ city.regionName || 'غير محدد' }}</td>
+                    <td>
+                      <input 
+                        type="number" 
+                        class="form-control py-3 input-gold text-end" 
+                        [(ngModel)]="cityPrices[city.id]"
+                        [disabled]="isPriceDisabled(city.id)"
+                        min="0" 
+                        step="0.01"
+                        [name]="'price_' + city.id"
+                        placeholder="أدخل السعر"
+                      >
+                    </td>
+                    <td class="text-center align-middle">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        [id]="'city_' + city.id"
+                        [(ngModel)]="citySelections[city.id]"
+                        [name]="'city_' + city.id"
+                      >
+                      <label class="form-check-label" [for]="'city_' + city.id"></label>
+                    </div>
+                  </td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <div *ngIf="filteredCities.length === 0" class="text-center py-3 text-muted">
+                <i class="fas fa-search fa-2x mb-2" style="color: #2c3e50;"></i>
+                <p>لم يتم العثور على مدن تطابق بحثك</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-center mt-4">
+       <button
+          type="button"
+          class="btn btn-primary px-5 py-3 fw-bold rounded-pill"
+          style="background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%);
+                border: none;
+                color: #1a2530;
+                min-width: 250px;"
+          [disabled]="merchantForm.invalid || isSubmitting"
+          (click)="createMerchant()"
+        >
+          <i class="fas fa-save me-2"></i>
+          <span *ngIf="!isSubmitting">حفظ التاجر</span>
+          <span *ngIf="isSubmitting">جاري الحفظ...</span>
+        </button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

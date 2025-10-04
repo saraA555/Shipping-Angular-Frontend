@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة التجار - شركة الشحن الموحدة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  </style>
+</head>
+<body class="rtl-form" style="font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #f1f2f6 100%); min-height: 100vh; padding: 20px;">
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+      <h2 class="mb-0 text-white fw-bold">
+        <i class="fas fa-users me-3" style="color: #D4AF37;"></i> قائمة التجار
+      </h2>  
+        <button *ngIf="hasPermission('Merchants:AddMerchants')" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm btn-confirm" routerLink="/addMerchant">  
+          <i class="fas fa-plus me-2"></i> تاجر جديد
+        </button>
+      
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="card-body p-4">
+        <div *ngIf="loading" class="text-center my-4">
+          <div class="spinner-border" style="color: #D4AF37;" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+          </div>
+          <p class="mt-3 text-muted">جاري تحميل بيانات التجار...</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!loading">
+          <table class="table table-bordered table-hover align-middle">
+            <thead style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+              <tr>
+                <th>#</th>
+                <th>اسم التاجر</th>
+                <th>رقم الهاتف</th>
+                <th>البريد الإلكتروني</th>
+                <th>العنوان</th>
+                <th>اسم الفرع</th>
+                <th>اسم المنطقة</th>
+                <th>اسم المدينة</th>
+                <th>اسم المتجر</th>
+                <th>المدن الخاصة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let merchant of merchants; let i = index" style="border-bottom: 1px solid #eee;">
+                <td>{{ i + 1 }}</td>
+                <td>{{ merchant.fullName }}</td>
+                <td>{{ merchant.phoneNumber }}</td>
+                <td>{{ merchant.email }}</td>
+                <td>{{ merchant.address }}</td>
+                <td>{{ merchant.branchNmae }}</td>
+                <td>{{ merchant.regionName }}</td>
+                <td>{{ merchant.cityName }}</td>
+                <td>{{ merchant.storeName }}</td>
+                <td>
+                  <ng-container *ngIf="(merchant.specialCities?.length || 0) > 0; else noSpecialCities">
+                    <button class="btn btn-sm rounded-pill" style="background: #4169E1; color: white;" (click)="openSpecialCitiesModal(merchant)">
+                      <i class="fas fa-city me-2"></i>عرض المدن
+                    </button>
+                  </ng-container>
+                  <ng-template #noSpecialCities>
+                    <span class="text-muted">لا توجد مدن خاصة</span>
+                    <button *ngIf="hasPermission('Cities:AddCities')" class="btn btn-sm btn-outline-primary rounded-pill ms-2" (click)="openSpecialCitiesModal(merchant)">
+                      <i class="fas fa-plus me-2"></i>إضافة مدن
+                    </button>
+                  </ng-template>
+                </td>
+                <td>
+                  <button *ngIf="hasPermission('Merchants:UpdateMerchants')" class="btn btn-sm rounded-pill" style="background: #4169E1; color: white;" (click)="openEditModal(merchant)">
+                    <i class="fas fa-edit me-2"></i> تعديل
+                  </button>
+                  <button *ngIf="hasPermission('Merchants:DeleteMerchants')"
+                   class="btn btn-sm rounded-pill ms-2" 
+                          style="background: #C41E3A; color: white;" 
+                          (click)="openDeleteConfirmation(merchant)">
+                    <i class="fas fa-trash me-2"></i> حذف
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="merchants.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-store-slash fa-2x mb-3" style="color: #D4AF37;"></i>
+            <p class="fw-bold">لا يوجد تجار للعرض</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" [class.show]="showEditModal" [class.d-block]="showEditModal" tabindex="-1" *ngIf="showEditModal">
+    <div class="modal-dialog modal-lg">
+      <form [formGroup]="editForm" (ngSubmit)="saveMerchant()">
+        <div class="modal-content rounded-4 overflow-hidden">
+          <div class="modal-header p-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+            <h5 class="modal-title text-white fw-bold">
+              <i class="fas fa-user-edit me-3" style="color: #D4AF37;"></i> تعديل بيانات التاجر
+            </h5>
+            <button type="button" class="btn-close position-absolute" style="left: 20px; top: 15px; color: #C41E3A;" (click)="closeEditModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="modal-body p-4">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-user" style="color: #D4AF37; margin: 10px;"></i>اسم التاجر
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-user"></i>
+                  </span>
+                  <input type="text" class="form-control py-3 input-gold" formControlName="fullName" />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-phone" style="color: #D4AF37; margin: 10px;"></i>رقم الهاتف
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-phone"></i>
+                  </span>
+                  <input type="text" class="form-control py-3 input-gold" formControlName="phoneNumber" />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-envelope" style="color: #D4AF37; margin: 10px;"></i>البريد الإلكتروني
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                  <input type="email" class="form-control py-3 input-gold" formControlName="email" />
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-store" style="color: #D4AF37; margin: 10px;"></i>اسم المتجر
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-store"></i>
+                  </span>
+                  <input type="text" class="form-control py-3 input-gold" formControlName="storeName" />
+                </div>
+              </div>
+              
+              <div class="col-md-12">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-map-marker-alt" style="color: #D4AF37; margin: 10px;"></i>العنوان
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </span>
+                  <input type="text" class="form-control py-3 input-gold" formControlName="address" />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-map" style="color: #D4AF37; margin: 10px;"></i>المحافظة
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-map"></i>
+                  </span>
+                  <ng-select class="form-select py-3 input-gold text-center"
+                    [items]="regions"
+                    bindLabel="governorate"
+                    bindValue="id"
+                    formControlName="regionId"
+                    placeholder="ابحث أو اختر المحافظة"
+                    [searchable]="true"
+                    [clearable]="true"
+                    [dir]="'rtl'"
+                    [dropdownPosition]="'bottom'"
+                    (change)="onRegionChangeEdit()"
+                  ></ng-select>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-city" style="color: #D4AF37; margin: 10px;"></i>المدينة
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-city"></i>
+                  </span>
+                  <ng-select class="form-select py-3 input-gold text-center"
+                    [items]="filteredCitiesEdit"
+                    bindLabel="name"
+                    bindValue="id"
+                    formControlName="cityId"
+                    placeholder="ابحث أو اختر المدينة"
+                    [searchable]="true"
+                    [clearable]="true"
+                    [dir]="'rtl'"
+                    [dropdownPosition]="'bottom'"
+                    [disabled]="isCityDisabled"
+                    (change)="onCityChangeEdit()"
+                  ></ng-select>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-code-branch" style="color: #D4AF37; margin: 10px;"></i>الفرع
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-code-branch"></i>
+                  </span>
+                  <ng-select class="form-select py-3 input-gold text-center"
+                    [items]="filteredBranchesEdit"
+                    bindLabel="name"
+                    bindValue="id"
+                    formControlName="branchId"
+                    placeholder="ابحث أو اختر الفرع"
+                    [searchable]="true"
+                    [clearable]="true"
+                    [dir]="'rtl'"
+                    [dropdownPosition]="'bottom'"
+                    [disabled]="isBranchDisabled"
+                  ></ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-footer p-4">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" (click)="closeEditModal()">
+              <i class="fas fa-times me-2"></i> إلغاء
+            </button>
+            <button type="submit" class="btn rounded-pill px-4 fw-bold" style="min-width: 150px; background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%); color: #1a2530;" [disabled]="editForm.invalid">
+              <i class="fas fa-save me-2"></i> حفظ التغييرات
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-backdrop fade show" *ngIf="showSpecialCitiesModal"></div>
+  </div>
+
+  <div class="modal" [class.show]="showSpecialCitiesModal" [class.d-block]="showSpecialCitiesModal" tabindex="-1" *ngIf="showSpecialCitiesModal">
+    <div class="modal-dialog modal-lg">
+      <form [formGroup]="specialCitiesForm" (ngSubmit)="saveAllSpecialCities()">
+        <div class="modal-content rounded-4 overflow-hidden">
+          <div class="modal-header p-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+            <h5 class="modal-title text-white fw-bold">
+              <i class="fas fa-city me-3" style="color: #D4AF37;"></i> المدن الخاصة بالتاجر  :  {{ selectedMerchant?.fullName }}
+            </h5>
+            <button type="button" class="btn-close position-absolute" style="left: 20px; top: 15px; color: #C41E3A;" (click)="closeSpecialCitiesModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="modal-body p-4">
+            <div *ngIf="specialCitiesForm && specialCitiesArray">
+              <table class="table table-bordered align-middle" *ngIf="specialCitiesArray.length > 0; else noSpecialCitiesModal">
+                <thead style="background: #2c3e50; color: white;">
+                  <tr>
+                    <th>اسم المدينة</th>
+                    <th>السعر</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="specialCities">
+                  <tr *ngFor="let city of specialCitiesArray.controls; let i = index" [formGroupName]="i">
+                    <td>
+                      <span>
+                        {{ city.get('cityName')?.value || getCityNameById(city.get('citySettingId')?.value) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="input-group">
+                        <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                          <i class="fas fa-money-bill-wave"></i>
+                        </span>
+                        <input type="number" class="form-control input-gold" formControlName="price" />
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-sm rounded-pill" style="background: #C41E3A; color: white;" (click)="deleteSpecialCity(i)">
+                        <i class="fas fa-trash me-2"></i> حذف
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <ng-template #noSpecialCitiesModal>
+                <div class="text-center text-muted py-4">
+                  <i class="fas fa-city fa-2x mb-3" style="color: #D4AF37;"></i>
+                  <p class="fw-bold">لا توجد مدن خاصة لهذا التاجر</p>
+                </div>
+              </ng-template>
+            </div>
+            
+            <hr>
+            
+            <div [formGroup]="newCityForm" class="row align-items-center g-2 mt-4">
+              <div class="col-md-5">
+                <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                  <i class="fas fa-plus-circle" style="color: #D4AF37; margin: 10px;"></i>إضافة مدينة جديدة
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-city"></i>
+                  </span>
+                  <select class="form-select py-3 input-gold" formControlName="citySettingId">
+                    <option value="">اختر المدينة</option>
+                    <option *ngFor="let city of allCities" [value]="city.id">{{ city.name }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text" style="background: #2c3e50; border-color: #1a2530; color: #D4AF37;">
+                    <i class="fas fa-money-bill-wave"></i>
+                  </span>
+                  <input type="number" class="form-control py-3 input-gold" formControlName="price" placeholder="سعر المدينة">
+                </div>
+              </div>
+              <div class="col-md-3 mt-4">
+                <button class="btn btn-primary rounded-pill w-100 py-3" type="button" (click)="addSpecialCity()" [disabled]="newCityForm.invalid">
+                  <i class="fas fa-plus me-2"></i> إضافة مدينة
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-footer p-4">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" (click)="closeSpecialCitiesModal()">
+              <i class="fas fa-times me-2"></i> إغلاق
+            </button>
+            <button type="submit" class="btn rounded-pill px-4 fw-bold" style="min-width: 150px; background: linear-gradient(135deg, #B8860B 0%, #D4AF37 100%); color: #1a2530;">
+              <i class="fas fa-save me-2"></i> حفظ التغييرات
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+  </div>
+
+      <div class="modal" [class.show]="showDeleteConfirmation" [class.d-block]="showDeleteConfirmation" 
+        tabindex="-1" *ngIf="showDeleteConfirmation">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+          <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+            <h5 class="modal-title">
+              <i class="fas fa-trash-alt me-2" style="color: #D4AF37;"></i> تأكيد الحذف
+            </h5>
+            <button type="button" class="btn-close btn-close-white close-btn-custom" (click)="closeDeleteConfirmation()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="fs-5 text-center">هل أنت متأكد من حذف التاجر "{{ merchantToDelete?.fullName }}"؟</p>
+            <p class="text-center text-danger fw-medium">لا يمكن التراجع عن هذا الإجراء بعد التنفيذ</p>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" 
+                    class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+                    (click)="closeDeleteConfirmation()">
+              <i class="fas fa-times me-2"></i> إلغاء
+            </button>
+            <button type="button" 
+                    class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-delete"
+                    (click)="deleteConfirmed()">
+              <i class="fas fa-trash me-2"></i> حذف
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-backdrop fade show"></div>
+    </div>
+</body>
+</html>

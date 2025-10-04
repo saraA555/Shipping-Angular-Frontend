@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة الطلبات - شركة الشحن الموحدة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+      <h2 class="mb-0 text-white fw-bold">
+        <i class="fas fa-shipping-fast me-3" style="color: #D4AF37;"></i> إدارة الطلبات
+      </h2>
+      <button *ngIf="hasPermission('Orders:AddOrders')"
+       class="btn rounded-pill px-4 py-2 fw-bold shadow-sm btn-confirm" routerLink="/orders/create">
+        <i class="fas fa-plus me-2"></i> طلب جديد
+      </button>
+    </div>
+    <div class="loading-overlay" *ngIf="loading">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <button class="btn status-btn flex-grow-1"
+                  [class.btn-confirm]="currentStatus === null"
+                  (click)="filterByStatus(null)">
+            الكل
+          </button>
+          <button *ngFor="let option of statusOptions"
+                  class="btn status-btn flex-grow-1"
+                  [class.btn-confirm]="currentStatus === option.value"
+                  (click)="filterByStatus(option.value)">
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="card-body p-0">
+        <div class="table-responsive" *ngIf="!loading">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+              <tr>
+                <th><input type="checkbox" (change)="selectAllOrders($event)"></th>
+                <th>الرقم التسلسلي</th>
+                <th>التاريخ</th>
+                <th>بيانات العميل</th>
+                <th>المحافظة</th>
+                <th>المدينة</th>
+                <th>التكلفة</th>
+                <th>الحالة</th>
+                <th>تعيين مندوب</th>
+                <th>تعديل الطلب</th>
+                <th>تغيير الحالة</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders">
+                <td><input type="checkbox" [(ngModel)]="order.selected"></td>
+                <td>{{ order.id }}</td>
+                <td>{{ order.createdAt | date : "dd MMM yyyy hh:mm a" }}</td>
+                <td [innerHTML]="getCustomerDetails(order)"></td>
+                <td>{{ order.region }}</td>
+                <td>{{ order.city }}</td>
+                <td>{{ order.orderCost | number : "1.2-2" }} ج.م</td>
+                <td>
+                  <span class="status-badge" [ngClass]="'status-' + getStatusClass(order.status)">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </td>
+                
+                <td>
+                  <ng-container *ngIf="order.courierId; else assignButton">
+                    <span class="text-success">
+                      <i class="fas fa-check-circle me-1"></i>
+                      {{ order.CourierName || "مندوب معين" }}
+                    </span>
+                  </ng-container>
+                  <ng-template #assignButton>
+                    <button  *ngIf="hasPermission('Orders:UpdateOrders')"
+                    class="btn btn-sm rounded-pill btn-edit" (click)="openCourierModal(order)">
+                      <i class="fas fa-user-plus me-1"></i> تعيين
+                    </button>
+                  </ng-template>
+                </td>
+                
+                <td>
+                  <button *ngIf="hasPermission('Orders:UpdateOrders')"
+                   class="btn btn-sm rounded-pill btn-edit" [routerLink]="['/orders/edit', order.id]">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+                
+                <td>
+                  <button *ngIf="hasPermission('Orders:UpdateOrders')"
+                  class="btn btn-sm rounded-pill btn-confirm" (click)="openStatusModal(order)">
+                    <i class="fas fa-exchange-alt"></i>
+                  </button>
+                </td>
+                
+                <td>
+                  <button *ngIf="hasPermission('Orders:DeleteOrders')"
+                  class="btn btn-sm rounded-pill btn-delete" (click)="deleteOrder(order.id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              
+              <tr *ngIf="orders.length === 0">
+                <td colspan="12" class="text-center py-4">
+                  <div class="text-muted">
+                    <i class="fas fa-inbox fs-1 mb-3" style="color: #D4AF37;"></i>
+                    <h5>لا توجد طلبات</h5>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 p-3 rounded-4 shadow-sm"
+         style="background: linear-gradient(90deg, #f1f2f6 0%, #e9ecef 100%); border: 1px solid #D4AF37;">
+      <div class="mb-3 mb-md-0">
+        <div class="d-flex align-items-center">
+          <span class="me-2 text-dark fw-medium">العناصر لكل صفحة:</span>
+          <select class="form-select form-select-sm border-primary input-gold"
+                  style="width: auto; padding-right: 30px;"
+                  [(ngModel)]="pageSize"
+                  (change)="onPageSizeChange(pageSize)">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </div>
+
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link rounded-start-pill" href="javascript:void(0)" (click)="prevPage()"
+               style="border: 1px solid #D4AF37;">
+              <i class="fas fa-chevron-right me-1"></i>
+            </a>
+          </li>
+          
+          <li class="page-item disabled">
+            <span class="page-link bg-light text-dark border-0">
+              الصفحة <b>{{ currentPage }}</b>
+            </span>
+          </li>
+          
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link rounded-end-pill" href="javascript:void(0)" (click)="nextPage()"
+               style="border: 1px solid #D4AF37;">
+              <i class="fas fa-chevron-left ms-1"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Status Change Modal -->
+  <div class="modal" [class.show]="showStatusModal" [class.d-block]="showStatusModal" tabindex="-1" *ngIf="showStatusModal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-exchange-alt me-2" style="color: #D4AF37;"></i> تغيير حالة الطلب رقم {{ selectedOrder?.id }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white close-btn-custom" (click)="closeStatusModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-4">
+            <label class="form-label fw-bold text-white mb-3" 
+                   style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              الحالة الحالية
+            </label>
+            <div class="alert py-2 text-center fw-bold status-badge" 
+                 [ngClass]="'status-' + getStatusClass(selectedOrder!.status)">
+              {{ getStatusLabel(selectedOrder!.status) }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold text-white mb-3" 
+                   style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              الحالة الجديدة
+            </label>
+            <select class="form-select py-3 input-gold text-center" [(ngModel)]="newStatus">
+              <option [ngValue]="null">اختر الحالة</option>
+              <option *ngFor="let option of statusOptions" [ngValue]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+                  style="min-width: 120px;" (click)="closeStatusModal()">
+            <i class="fas fa-times me-1"></i> إلغاء
+          </button>
+          <button type="button" class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-confirm"
+                  style="min-width: 120px;" 
+                  (click)="updateOrderStatus()"
+                  [disabled]="!newStatus || newStatus === selectedOrder!.status">
+            <i class="fas fa-save me-1"></i> حفظ
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+  </div>
+
+  <!-- Courier Assignment Modal -->
+  <div class="modal" [class.show]="showCourierModal" [class.d-block]="showCourierModal" tabindex="-1" *ngIf="showCourierModal">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-user-plus me-2" style="color: #D4AF37;"></i> تعيين مندوب للطلب رقم {{ selectedOrder!.id }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white close-btn-custom" 
+                  (click)="closeCourierModal()" [disabled]="isAssigning"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-4">
+            <label class="form-label fw-bold text-white mb-3" 
+                   style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+              اختر المندوب
+            </label>
+            <select class="form-select py-3 input-gold text-center" [(ngModel)]="selectedCourierId">
+              <option [ngValue]="null">اختر مندوب</option>
+             <option *ngFor="let courier of availableCouriers" [value]="courier.Id">
+                {{ courier.fullName }} ( الفرع التابع له المندوب : {{ courier.branchName }})
+              </option>
+
+            </select>
+          </div>
+          
+          <div *ngIf="isAssigning" class="text-center mt-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+                  style="min-width: 120px;" (click)="closeCourierModal()" [disabled]="isAssigning">
+            <i class="fas fa-times me-1"></i> إلغاء
+          </button>
+          <button type="button" class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-confirm"
+                  style="min-width: 120px;" 
+                  [disabled]="!selectedCourierId || isAssigning"
+                  (click)="assignCourier(selectedOrder!)">
+            <i class="fas fa-check me-1"></i> تأكيد
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+  </div>
+</body>
+</html>

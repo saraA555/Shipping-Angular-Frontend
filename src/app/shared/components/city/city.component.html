@@ -1,0 +1,276 @@
+<div class="container mt-5 arabic-style">
+  <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+    <h2 class="mb-0 text-white fw-bold">
+      <i class="fas fa-city me-2" style="color: #D4AF37;"></i> إدارة المدن
+    </h2>
+    <button  *ngIf="hasPermission('Cities:AddCities')"
+    class="btn rounded-pill px-4 py-2 fw-bold shadow-sm btn-confirm" (click)="openCreateModal()">
+      <i class="fas fa-plus-circle me-2"></i> إضافة مدينة جديدة
+    </button>
+  </div>
+
+  <!-- Cities Table - Updated -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+    <div class="card-body p-0">
+      <div class="table-responsive-lg">
+        <table class="table table-hover mb-0">
+          <thead style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+            <tr>
+              <th class="py-3">#</th>
+              <th class="py-3">اسم المدينة</th>
+              <th class="py-3">تكلفة الشحن</th>
+              <th class="py-3">تكلفة ال Pickup</th>
+              <th class="py-3">اسم المنطقة</th>
+              <th class="py-3 text-center">الإعدادات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let city of cities; let i = index" class="transition">
+              <td class="align-middle">
+                {{ (PageNumber - 1) * pageSize + i + 1 }}
+              </td>
+              <td class="align-middle fw-medium">{{ city.name }}</td>
+              <td class="align-middle">{{ city.standardShippingCost }}</td>
+              <td class="align-middle">{{ city.pickupShippingCost }}</td>
+              <td class="align-middle">{{ city.regionName }}</td>
+              <td class="align-middle text-center">
+                <div class="btn-group" role="group">
+                  <button *ngIf="hasPermission('Cities:UpdateCities')"
+                    (click)="openEditModal(city)"
+                    class="btn btn-sm btn-edit rounded-pill mx-1"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button *ngIf="hasPermission('Cities:DeleteCities')"
+                    (click)="confirmDelete(city.id)"
+                    class="btn btn-sm btn-delete rounded-pill me-2"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="cities.length === 0">
+              <td colspan="6" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="fas fa-city fs-1 mb-3" style="color: #D4AF37;"></i>
+                  <h5>لا توجد مدن للعرض</h5>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination Controls - Updated -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 p-3 rounded-4 shadow-sm"
+       style="background: linear-gradient(90deg, #f1f2f6 0%, #e9ecef 100%); border: 1px solid #D4AF37;">
+    <div class="mb-3 mb-md-0">
+      <div class="d-flex align-items-center">
+        <span class="me-2 text-dark fw-medium">العناصر لكل صفحة:</span>
+        <select class="form-select form-select-sm border-primary input-gold"
+                style="width: auto; padding-right: 30px;"
+                [(ngModel)]="pageSize"
+                (change)="onPageSizeChange(pageSize)">
+          <option value="5">5</option>
+          <option value="7">7</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+    </div>
+    
+    <nav aria-label="Page navigation">
+      <ul class="pagination mb-0">
+        <li class="page-item" [class.disabled]="PageNumber === 1">
+          <button
+            class="page-link rounded-start-pill"
+            (click)="prevPage()"
+            [disabled]="PageNumber === 1"
+            style="border: 1px solid #D4AF37;"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link bg-light text-dark border-0">
+            الصفحة <b>{{ PageNumber }}</b>
+          </span>
+        </li>
+        <li class="page-item" [class.disabled]="PageNumber === totalPages">
+          <button
+            class="page-link rounded-end-pill"
+            (click)="nextPage()"
+            [disabled]="PageNumber === totalPages"
+            style="border: 1px solid #D4AF37;"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Create/Edit Modal - Updated -->
+  <div
+    class="modal"
+    [class.show]="showModal"
+    [style.display]="showModal ? 'block' : 'none'"
+    tabindex="-1"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-edit me-2" style="color: #D4AF37;"></i>
+            {{ isEditMode ? "تعديل المدينة" : "إضافة مدينة جديدة" }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white close-btn-custom"
+            (click)="closeModal()"
+          ><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body py-4">
+          <form class="rtl-form">
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-city me-2"></i> اسم المدينة
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg input-gold"
+                id="cityName"
+                [(ngModel)]="selectedCity.name"
+                placeholder="أدخل اسم المدينة"
+                required
+                name="cityName"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-shipping-fast me-2"></i> تكلفة الشحن
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg input-gold"
+                id="standardShippingCost"
+                [(ngModel)]="selectedCity.standardShippingCost"
+                placeholder="أدخل تكلفة الشحن"
+                required
+                name="standardShippingCost"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-truck-pickup me-2"></i> تكلفة ال Pickup
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg input-gold"
+                id="pickupShippingCost"
+                [(ngModel)]="selectedCity.pickupShippingCost"
+                placeholder="أدخل تكلفة ال Pickup"
+                required
+                name="pickupShippingCost"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-map-marker-alt me-2"></i> اسم المنطقة
+              </label>
+              <ng-select
+                [items]="regions"
+                bindLabel="governorate"
+                [bindValue]="'id'"
+                [(ngModel)]="selectedCity.regionId"
+                placeholder="ابحث أو اختر المحافظة"
+                [searchable]="true"
+                [clearable]="true"
+                [dir]="'rtl'"
+                [dropdownPosition]="'bottom'"
+                id="regionId"
+                required
+                class="input-gold"
+                name="regionId"
+              >
+                <ng-template ng-label-tmp let-item="item">
+                  {{ item.governorate }}
+                </ng-template>
+              </ng-select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+            (click)="closeModal()"
+          >
+            <i class="fas fa-times-circle me-2"></i> إلغاء
+          </button>
+          <button
+            type="button"
+            class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-confirm"
+            (click)="saveCity()"
+          >
+            <i class="fas fa-save me-2"></i> حفظ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal - Updated -->
+  <div
+    class="modal"
+    [class.show]="deletingId !== null"
+    [style.display]="deletingId !== null ? 'block' : 'none'"
+    tabindex="-1"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-trash-alt me-2" style="color: #D4AF37;"></i> تأكيد الحذف
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white close-btn-custom"
+            (click)="cancelDelete()"
+          ><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <p class="fs-5 text-center">هل أنت متأكد من حذف هذه المدينة؟</p>
+          <p class="text-center text-danger fw-medium">لا يمكن التراجع عن هذا الإجراء بعد التنفيذ</p>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+            (click)="cancelDelete()"
+          >
+            <i class="fas fa-times me-2"></i> إلغاء
+          </button>
+          <button
+            type="button"
+            class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-delete"
+            (click)="deleteCity(deletingId!)"
+          >
+            <i class="fas fa-trash me-2"></i> حذف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="modal-backdrop fade show"
+    *ngIf="showModal || deletingId !== null"
+    (click)="showModal ? closeModal() : cancelDelete()"
+  ></div>
+</div>

@@ -1,0 +1,290 @@
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
+<div class="section" style="font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #f1f2f6 100%);">
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+      <h2 class="mb-0 text-white fw-bold">
+        <i class="fas fa-users me-3" style="color: #D4AF37;"></i> قائمة الموظفين
+      </h2>
+      <div class="d-flex align-items-center">
+        <button *ngIf="hasPermission('Employees:AddEmployees')" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm btn-confirm" routerLink="/add-employee">  
+          <i class="fas fa-plus me-2"></i> موظف جديد
+        </button>
+      </div>
+    </div> 
+    <div *ngIf="loading" class="text-center my-4">
+      <div class="spinner-grow text-primary" role="status">
+        <span class="visually-hidden">جاري التحميل...</span>
+      </div>
+    </div>
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+      <div class="card-body p-0">
+        <div class="table-responsive" *ngIf="!loading">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+              <tr>
+                <th class="text-center">#</th>
+                <th>الاسم</th>
+                <th>البريد الإلكتروني</th>
+                <th>رقم الهاتف</th>
+                <th>الفرع</th>
+                <th>الدور</th>
+                <th class="text-center">الحالة</th>
+                <th class="text-center">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let emp of employees; let i = index">
+                <td class="text-center">{{ i + 1 }}</td>
+                <td class="text-center">{{ emp.fullName }}</td>
+                <td class="text-center">{{ emp.email }}</td>
+                <td class="text-center">{{ emp.phoneNumber }}</td>
+                <td class="text-center">{{ emp.branchName }}</td>
+                <td class="text-center">{{ emp.roleName }}</td>
+                <td class="text-center">
+                  <span [ngClass]="{'text-success': !emp.isDeleted, 'text-danger': emp.isDeleted}">
+                    {{ emp.isDeleted ? 'غير نشط' : 'نشط' }}
+                  </span>
+                </td>
+                <td class="text-center">
+               
+                  <button *ngIf="hasPermission('Employees:UpdateEmployees')" class="btn btn-sm me-2 rounded-pill px-3 py-2 action-btn" style="background: #4169E1; color: white;" (click)="openEditModal(emp)" >
+                    <i class="fas fa-edit me-1"></i> تعديل
+                  </button>
+               
+                  <button *ngIf="hasPermission('Employees:DeleteEmployees')" class="btn btn-sm rounded-pill px-3 py-2 action-btn" style="background: #C41E3A; color: white;" (click)="openDeleteConfirmation(emp)">
+                    <i class="fas fa-trash me-1"></i> حذف
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div *ngIf="allEmployees.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-inbox fs-1 mb-3"></i>
+            <h5>لا يوجد موظفين للعرض</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 p-3 rounded-4 shadow-sm" style="background: linear-gradient(90deg, #f1f2f6 0%, #e9ecef 100%); border: 1px solid #D4AF37;">
+      <div class="mb-3 mb-md-0">
+        <div class="d-flex align-items-center">
+          <span class="me-2 text-dark fw-medium">العناصر لكل صفحة:</span>
+          <select
+            class="form-select form-select-sm border-primary input-gold"
+            style="width: auto; padding-right: 30px;"
+            [(ngModel)]="pageSize"
+            (change)="onPageSizeChange(pageSize)"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </div>
+
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+          <li class="page-item" [class.disabled]="PageNumber === 1">
+            <a
+              class="page-link rounded-start-pill"
+              href="javascript:void(0)"
+              (click)="prevPage()"
+              style="border: 1px solid #D4AF37;"
+            >
+              <i class="fas fa-chevron-right me-1"></i>
+            </a>
+          </li>
+          
+          <li class="page-item disabled">
+            <span class="page-link bg-light text-dark border-0">
+              الصفحة <b>{{ PageNumber }}</b>
+            </span>
+          </li>
+          
+          <li class="page-item" [class.disabled]="PageNumber === totalPages">
+            <a
+              class="page-link rounded-end-pill"
+              href="javascript:void(0)"
+              (click)="nextPage()"
+             
+              style="border: 1px solid #D4AF37;"
+            >
+              <i class="fas fa-chevron-left ms-1"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+<div
+  class="modal"
+  [class.show]="showEditModal"
+  [class.d-block]="showEditModal"
+  tabindex="-1"
+  *ngIf="showEditModal"
+>
+  <div class="modal-dialog modal-lg">
+    <form [formGroup]="editForm" (ngSubmit)="updateEmployee()">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-user-edit me-2" style="color: #D4AF37;"></i> تعديل بيانات الموظف
+          </h5>
+          <button type="button" class="btn-close btn-close-white close-btn-custom" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-4">
+      
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-user me-2" style="color: #D4AF37;"></i>الاسم بالكامل
+              </label>
+              <input 
+                type="text" 
+                class="form-control py-3 input-gold"
+                formControlName="fullName"
+                placeholder="الاسم بالكامل"
+              />
+              <div *ngIf="editForm.get('fullName')?.invalid && editForm.get('fullName')?.touched" 
+                   class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-1"></i>الاسم مطلوب
+              </div>
+            </div>
+            
+           
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-phone me-2" style="color: #D4AF37;"></i>رقم الهاتف
+              </label>
+              <input 
+                type="tel" 
+                class="form-control py-3 input-gold"
+                formControlName="phoneNumber"
+                placeholder="رقم الهاتف"
+              />
+              <div *ngIf="editForm.get('phoneNumber')?.errors?.['pattern']" 
+                   class="text-danger mt-2 fw-medium">
+                <i class="fas fa-exclamation-circle me-1"></i>رقم هاتف مصري صحيح مطلوب (11 رقم)
+              </div>
+            </div>
+            
+           
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-code-branch me-2" style="color: #D4AF37;"></i>الفرع
+              </label>
+              <select 
+                class="form-select py-3 input-gold text-center"
+                formControlName="branchId"              
+              >
+                <option value="" disabled>اختر الفرع</option>
+                <option *ngFor="let branch of branches" [value]="branch.id">
+                  {{ branch.name }}
+                </option>
+                <option *ngIf="isLoadingBranches" disabled>جاري تحميل الفروع...</option>
+              </select>
+            </div>
+            
+        
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-white mb-3" style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-user-tag me-2" style="color: #D4AF37;"></i>الدور الوظيفي
+              </label>
+              <select 
+                class="form-select py-3 input-gold text-center"
+                formControlName="roleId"
+              >
+                <option value="" disabled>اختر الدور</option>
+                <ng-container *ngIf="roles && roles.length > 0">
+                <option *ngFor="let role of roles" [value]="role.roleId">
+                    {{ role.roleName }}
+                </option>
+                </ng-container>
+                <option *ngIf="isLoadingRoles" disabled>جاري تحميل الأدوار...</option>
+                <option *ngIf="!isLoadingRoles && (!roles || roles.length === 0)" disabled>لا توجد أدوار متاحة</option>
+              </select>
+            </div>
+          
+            <div class="col-12">
+              <div class="form-check form-switch d-flex align-items-center">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  role="switch" 
+                  id="isDeleted" 
+                  formControlName="isDeleted"
+                  style="width: 3rem; height: 1.5rem; background-color: #B8860B;"
+                >
+                <label class="form-check-label ms-3" for="isDeleted">
+                  موظف غير نشط
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-top-0 pt-0">
+          <button 
+            type="button" 
+            class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+            style="min-width: 120px;"
+            (click)="closeEditModal()"
+          >
+            <i class="fas fa-times me-1"></i> إلغاء
+          </button>
+          <button 
+            type="submit" 
+            class="btn rounded-pill px-4 py-2 fw-medium shadow-sm gold-btn"
+            style="min-width: 120px;"
+            [disabled]="editForm.invalid || isSubmitting"
+          >
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            } @else {
+              <i class="fas fa-save me-1"></i>
+            }
+            {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+</div>
+
+<div class="modal rtl-modal" [class.show]="showDeleteConfirmation" [class.d-block]="showDeleteConfirmation" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+      <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+        <h5 class="modal-title">
+          <i class="fas fa-trash-alt me-2" style="color: #D4AF37;"></i> تأكيد الحذف
+        </h5>
+        <button type="button" class="btn-close btn-close-white close-btn-custom" (click)="cancelDelete()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="fs-5 text-center">هل أنت متأكد من حذف الموظف {{ deletingEmployeeName }}؟</p>
+        <p class="text-center text-danger fw-medium">لا يمكن التراجع عن هذا الإجراء بعد التنفيذ</p>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" 
+                class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+                (click)="cancelDelete()">
+          <i class="fas fa-times me-2"></i> إلغاء
+        </button>
+        <button type="button" 
+                class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-delete"
+                (click)="confirmDelete()">
+          <i class="fas fa-trash me-2"></i> حذف
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show" (click)="cancelDelete()"></div>
+</div>

@@ -1,0 +1,153 @@
+<div class="container mt-5 arabic-style">
+  <!-- Page Header - Updated -->
+  <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+    <h2 class="mb-0 text-white fw-bold">
+      <i class="fas fa-weight-hanging me-2" style="color: #D4AF37;"></i> إدارة إعدادات الوزن
+    </h2>
+  </div>
+
+  <!-- Weight Setting Table - Updated -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+    <div class="card-body p-0">
+      <div class="table-responsive-lg">
+        <table class="table table-hover mb-0">
+          <thead style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%); color: white;">
+            <tr>
+              <th class="py-3">#</th>
+              <th class="py-3">الوزن الأدنى</th>
+              <th class="py-3">الوزن الأقصى</th>
+              <th class="py-3">التكلفة لكل كجم</th>
+              <th class="py-3">تاريخ الإنشاء</th>
+              <th class="py-3 text-center">الإعدادات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="weightSetting; else noData" class="transition">
+              <td class="align-middle">1</td>
+              <td class="align-middle fw-medium">{{ weightSetting.minWeight }}</td>
+              <td class="align-middle">{{ weightSetting.maxWeight }}</td>
+              <td class="align-middle">{{ weightSetting.costPerKg }}</td>
+              <td class="align-middle">
+                {{ weightSetting.createdAt | date: 'mediumDate' }}
+              </td>
+              <td class="align-middle text-center">
+                <button *ngIf="hasPermission('Settings:UpdateSettings')"
+                  (click)="openEditModal()"
+                  class="btn btn-sm btn-edit rounded-pill mx-1"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            <ng-template #noData>
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="text-muted">
+                    <i class="fas fa-weight-hanging fs-1 mb-3" style="color: #D4AF37;"></i>
+                    <h5>لا توجد إعدادات وزن للعرض</h5>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal - Updated -->
+  <div
+    class="modal"
+    [class.show]="showModal"
+    [style.display]="showModal ? 'block' : 'none'"
+    tabindex="-1"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 overflow-hidden" style="border-top: 4px solid #D4AF37;">
+        <div class="modal-header text-white" style="background: linear-gradient(90deg, #1a2530 0%, #2c3e50 100%);">
+          <h5 class="modal-title">
+            <i class="fas fa-edit me-2" style="color: #D4AF37;"></i> تعديل إعداد الوزن
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white close-btn-custom"
+            (click)="closeModal()"
+          ><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body py-4">
+          <form class="rtl-form">
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-weight me-2"></i> الوزن الأدنى
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg input-gold"
+                id="minWeight"
+                [(ngModel)]="selectedWeightSetting.minWeight"
+                placeholder="أدخل الوزن الأدنى"
+                required
+                name="minWeight"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-weight me-2"></i> الوزن الأقصى
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg input-gold"
+                id="maxWeight"
+                [(ngModel)]="selectedWeightSetting.maxWeight"
+                placeholder="أدخل الوزن الأقصى"
+                required
+                name="maxWeight"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold text-white mb-3" 
+                     style="background: #2c3e50; padding: 8px 5px; border-radius: 8px; display: inline-block;">
+                <i class="fas fa-money-bill-wave me-2"></i> التكلفة لكل كجم
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg input-gold"
+                id="costPerKg"
+                [(ngModel)]="selectedWeightSetting.costPerKg"
+                placeholder="أدخل التكلفة لكل كجم"
+                required
+                name="costPerKg"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-light text-primary rounded-pill px-4 py-2 fw-medium"
+            (click)="closeModal()"
+          >
+            <i class="fas fa-times-circle me-2"></i> إلغاء
+          </button>
+          <button
+            type="button"
+            class="btn rounded-pill px-4 py-2 fw-medium shadow-sm btn-confirm"
+            (click)="saveWeightSetting()"
+          >
+            <i class="fas fa-save me-2"></i> حفظ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background overlay for modal -->
+  <div
+    class="modal-backdrop fade show"
+    *ngIf="showModal"
+    (click)="closeModal()"
+  ></div>
+</div>
+

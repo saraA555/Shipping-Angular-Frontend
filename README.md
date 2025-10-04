@@ -76,25 +76,6 @@ Export reports in various formats.
 User Management Service:
 Register employees.
 Manage permissions based on roles.
-
-Project Structure
-
-src/
-├── app/
-│   ├── core/
-│   │   ├── services/       # Services
-│   │   ├── guards/         # Guards
-│   │   ├── interceptors/   # Interceptors
-│   ├── shared/
-│   │   ├── components/     # Shared Components
-│   │   ├── enum/           # Enums
-│   │   ├── models/         # Interfaces
-│   ├── features/
-│   │   ├── main-system/    # Main Features
-│   ├── app.component.ts    # Main Component
-│   ├── app.routes.ts       # Routing Configuration
-│   ├── environment.ts      # Environment Settings
-
 Contributors
 Developer Name: Mahmoud Elwesemy
 Email: weso2020@icloud.com

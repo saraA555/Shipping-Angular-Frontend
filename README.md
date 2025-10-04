@@ -76,6 +76,3 @@ Export reports in various formats.
 User Management Service:
 Register employees.
 Manage permissions based on roles.
-Contributors
-Developer Name: Mahmoud Elwesemy
-Email: weso2020@icloud.com
